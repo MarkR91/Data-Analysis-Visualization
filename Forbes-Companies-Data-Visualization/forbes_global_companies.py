@@ -2,43 +2,40 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-# Change the style of plots
-# plt.rcParams["figure.figsize"] = (10, 6)
-# plt.rcParams["font.size"] = ?
-# plt.rcParams["axes.grid"] = True
+# Set the area of the plot
+plt.rcParams["figure.figsize"] = (16, 10)
 
+# Read in n<=100 rows from the Forbes data set.
+df = pd.read_csv('forbes_global_2022_companies.csv').head(100)
 
-# Read in Forbes data set (n<=100)
-df = pd.read_csv('forbes_global_2022_companies.csv') # rank , global company, country ,sales 	,profit 	,assets	,market value
-# print("Data type =",type(df))
 
 # Check for missing values
 # print(df.isna().to_string())
 
-# Print the first 5 rows
-# print(df.head())
-         
-# Use dropna() if need be
 
-# Try the following to strip problematic leading and trailing whitespaces that might cause key read errors from each column name.
+# Use the following to strip problematic leading and trailing whitespaces that might cause key read errors from each column name.
 df.columns = df.columns.str.strip()
 
-#Check columns
-print('Columns =',df.columns)
+# Extract the sales figures from strings of columns: sales
+df['sales'] = df['sales'].str.extract('(\d+)',expand=False)
+df['sales']=  pd.to_numeric(df['sales'])
+
 
 # Do a barchart showing total sales for each company in the dataset.
          
-rev_stats = df.sort_values(by='sales').head() #sort values for first 5 companies
-# print(rev_stats.to_string())
+sales_stats = df.sort_values(by='sales',ascending=False).head(10) #sort values for first 10 companies
+print(sales_stats.to_string())
 
-rev_stats.plot(kind='bar',rot=0) #create bar chart
+
+sales_stats.plot(kind='bar',y='sales', x='global company',rot=20, fontsize=6) #create bar chart
                                           
 
 # Add axis labels and title
 plt.xlabel('Company')
-plt.ylabel('Sales')
+plt.ylabel('Sales (Billions 2022)')
 plt.title('Sales by Company')
 
+# Show the plot of Sales of the top 10 Global Companies
 plt.show()
 
 # Calculate the average profit
