@@ -1,41 +1,55 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Functions to be used to process the sales data stored as as alphanumeric strings in the sales columns.
 
-# Set the area of the plot
+def convertToB(x):
+    x= x.str.extract('(\d+\.\d+|\d+)',expand=False)
+    ix =pd.to_numeric(x)
+    return ix/1000
+
+def convertToNumeric(x):  
+    x= x.str.extract('(\d+\.\d+|\d+)',expand=False)
+    ix =pd.to_numeric(x)
+    return ix
+
+# Set the dimensions of the plot
 plt.rcParams["figure.figsize"] = (16, 10)
 
 # Read in n<=100 rows from the Forbes data set.
 df = pd.read_csv('forbes_global_2022_companies.csv').head(100)
 
-
 # Check for missing values
 # print(df.isna().to_string())
 
+# Check data types of columns in the dataframe created
+print(df.info)
 
-# Use the following to strip problematic leading and trailing whitespaces that might cause key read errors from each column name.
+# Use the following to strip any problematic leading and trailing whitespaces that might cause key read errors for any column name.
 df.columns = df.columns.str.strip()
 
-# Extract the sales figures from strings of columns: sales
-df['sales'] = df['sales'].str.extract('(\d+)',expand=False)
-df['sales']=  pd.to_numeric(df['sales'])
+# Standardize the sales data in the dataframe to Billions and with the float datatype. The Forbes data set is stored as alphanumeric strings and the sales column gives figures in both millions with 'M'and billions'B'.
+# The following code is used to convert sales figures given in 'M' millions to billions and store it as a float. Similarly, sales figures recored as "$7.52 B" are converted to 7.52 for example.
 
+df['sales'].mask(df['sales'].str.endswith("M"),convertToB,inplace=True)
+df['sales'] = df['sales'].astype(str)
 
-# Do a barchart showing total sales for each company in the dataset.
-         
-sales_stats = df.sort_values(by='sales',ascending=False).head(10) #sort values for first 10 companies
-print(sales_stats.to_string())
+df['sales'].mask(df['sales'].str.endswith("B") ,convertToNumeric,inplace=True)
+df['sales'] = df['sales'].astype(float)
 
+# Do the barchart showing total sales for each company in the dataset.    
+# Sort the values in descending order for first 10 companies.    
+sales_stats = df.sort_values(by='sales',ascending=False).head(10) 
+#print(sales_stats.to_string())
 
 sales_stats.plot(kind='bar',y='sales', x='global company',rot=20, fontsize=6) #create bar chart
                                           
-
-# Add axis labels and title
-plt.xlabel('Company')
-plt.ylabel('Sales (Billions 2022)')
+# Add title and axis labels 
 plt.title('Sales by Company')
+plt.ylabel('Sales (Billions 2022)')
 
-# Show the plot of Sales of the top 10 Global Companies
+
+# Show the plot of sales of the top 10 Global Companies
 plt.show()
 
 # Calculate the average profit
